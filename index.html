@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Happy Birthday Koko! ✨ 3D Celebration</title>
+  <meta name="description" content="A magical 3D birthday celebration experience dedicated to my bestie Koko." />
+
+  <!-- Google Fonts: Fredoka + Nunito + Dancing Script -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- Canvas Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Three.js pinned version -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <!-- 3D WebGL Background Canvas -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Floating Audio & Quick Action Dock -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <span class="sparkle-icon">✨</span>
+      <span class="brand-text">KOKO'S DAY</span>
+    </div>
+    <div class="nav-controls">
+      <button id="music-toggle-btn" class="nav-btn" aria-label="Toggle Birthday Melody" title="Play celebration melody">
+        <div class="equalizer-bars" aria-hidden="true">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+        <span id="music-btn-label">Play Music</span>
+      </button>
+      <button id="confetti-quick-btn" class="nav-btn highlight" aria-label="Shoot Confetti" title="Confetti Cannon">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span>Party Blast!</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="page-container">
+
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Dedicated to the one &amp; only Bestie</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="title-sub">HAPPY BIRTHDAY</span>
+        <span class="title-main glowing-text">KOKO!</span>
+      </h1>
+
+      <p class="hero-quote">
+        "To my partner in crime, chief mood-lifter, and the truest friend anyone could wish for.
+        Today, the spotlight belongs exclusively to you!"
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#cake-chamber" class="btn btn-primary glow-btn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Make a Wish
+        </a>
+        <a href="#memory-cylinder" class="btn btn-glass">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Explore 3D Memories
+        </a>
+        <a href="#gift-section" class="btn btn-accent">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+          Open Surprise
+        </a>
+      </div>
+
+      <!-- Floating 3D Highlight Badges in Hero -->
+      <div class="hero-card-preview" id="hero-tilt-banner">
+        <div class="floating-bubble bubble-1">🎂 Celebrate</div>
+        <div class="floating-bubble bubble-2">💖 Bestie Forever</div>
+        <div class="floating-bubble bubble-3">🌟 10/10 Vibes</div>
+      </div>
+
+      <div class="scroll-down-hint">
+        <span>Scroll down to continue the party</span>
+        <div class="mouse-scroll">
+          <div class="mouse-wheel"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: INTERACTIVE 3D CAKE & CANDLE WISH -->
+    <section class="section-container" id="cake-chamber">
+      <div class="section-header">
+        <span class="section-tag">Interactive Moment</span>
+        <h2 class="section-title">Blow Out The Birthday Candles 🎂</h2>
+        <p class="section-subtitle">Make your deepest wish, Koko! Tap the flame or press the button to blow them out.</p>
+      </div>
+
+      <div class="cake-stage-wrapper">
+        <!-- 3D Cake Container -->
+        <div class="cake-stage">
+          <div class="cake-3d" id="birthday-cake">
+            <!-- Plate / Base -->
+            <div class="plate"></div>
+
+            <!-- Bottom Tier -->
+            <div class="tier tier-bottom">
+              <div class="cake-side"></div>
+              <div class="cake-top">
+                <div class="frosting-drips"></div>
+              </div>
+            </div>
+
+            <!-- Middle Tier -->
+            <div class="tier tier-middle">
+              <div class="cake-side"></div>
+              <div class="cake-top">
+                <div class="sprinkles"></div>
+              </div>
+            </div>
+
+            <!-- Top Tier -->
+            <div class="tier tier-top">
+              <div class="cake-side"></div>
+              <div class="cake-top">
+                <!-- 3 Birthday Candles with 3D Flickering Flames -->
+                <div class="candles-group">
+                  <div class="candle candle-1" data-candle="1">
+                    <div class="flame" id="flame-1"></div>
+                    <div class="wick"></div>
+                    <div class="candle-body"></div>
+                  </div>
+                  <div class="candle candle-2" data-candle="2">
+                    <div class="flame" id="flame-2"></div>
+                    <div class="wick"></div>
+                    <div class="candle-body"></div>
+                  </div>
+                  <div class="candle candle-3" data-candle="3">
+                    <div class="flame" id="flame-3"></div>
+                    <div class="wick"></div>
+                    <div class="candle-body"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blow Interaction Controls -->
+        <div class="cake-actions">
+          <button id="blow-candles-btn" class="btn btn-primary pulse-action">
+            <span class="blow-icon">💨</span>
+            <span id="blow-btn-text">Blow Out All Candles!</span>
+          </button>
+          <button id="relight-candles-btn" class="btn btn-outline" style="display: none;">
+            <span>✨ Relight Candles</span>
+          </button>
+        </div>
+
+        <!-- Wish Message Card (Unlocked on Blowout) -->
+        <div id="wish-unlocked-card" class="wish-card hidden-element">
+          <div class="wish-badge">🎉 WISH GRANTED!</div>
+          <h3 class="wish-title">Happy Birthday, Gorgeous!</h3>
+          <p class="wish-text">
+            May this year bring you boundless happiness, thrilling breakthroughs, vibrant health,
+            and laughter so deep it brightens every room! You deserve the world and every bit of magic in it.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: 3D CYLINDRICAL MEMORY CAROUSEL (ALL 14 PHOTOS) -->
+    <section class="section-container" id="memory-cylinder">
+      <div class="section-header">
+        <span class="section-tag">Memory Reel</span>
+        <h2 class="section-title">The 3D Gallery of Koko 📸</h2>
+        <p class="section-subtitle">
+          All our unforgettable moments! Drag with your finger or mouse to spin the 3D cylinder. Click any card to inspect.
+        </p>
+      </div>
+
+      <!-- 3D Carousel Stage -->
+      <div class="cylinder-viewport" id="carousel-viewport">
+        <div class="cylinder-container" id="carousel-cylinder">
+          <!-- 14 Polaroid Cards placed in 3D space -->
+
+          <div class="polaroid-card" data-index="0" data-caption="Sun-kissed elegance &amp; pure radiance">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.52 (1).jpeg" alt="Koko moment 1" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Golden Hour Queen ☀️</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="1" data-caption="Unmatched poise and natural charm">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.52.jpeg" alt="Koko moment 2" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Grace &amp; Glam ✨</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="2" data-caption="That signature Koko smile that lights up any room">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.53.jpeg" alt="Koko moment 3" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Pure Joy 💖</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="3" data-caption="Effortlessly stylish on every occasion">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.54 (1).jpeg" alt="Koko moment 4" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Vibe Check: 100/100 💅</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="4" data-caption="Always ready for the camera, never caught off guard">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.54.jpeg" alt="Koko moment 5" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Picture Perfect 📸</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="5" data-caption="Laughter, confidence, and vibrant energy">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.55 (1).jpeg" alt="Koko moment 6" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Unfiltered Happiness 🌸</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="6" data-caption="Stunning vibes and magnetic presence">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.55.jpeg" alt="Koko moment 7" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Timeless Moments 💫</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="7" data-caption="The best memories are the ones with you">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.56 (1).jpeg" alt="Koko moment 8" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Cherished Bond 🌷</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="8" data-caption="Unconditional cheer and sweetest company">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.56.jpeg" alt="Koko moment 9" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Sweetest Soul 🍰</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="9" data-caption="Every adventure is better with you by my side">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.57 (1).jpeg" alt="Koko moment 10" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Adventure Ready 🚀</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="10" data-caption="Elegance is an attitude, and you own it">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.57.jpeg" alt="Koko moment 11" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Icon Status 👑</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="11" data-caption="Countless inside jokes and lifelong trust">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.58 (1).jpeg" alt="Koko moment 12" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Forever Bestie 👯‍♀️</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="12" data-caption="Lighting up the room wherever you step">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.58.jpeg" alt="Koko moment 13" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Radiant Energy 🌟</div>
+            </div>
+          </div>
+
+          <div class="polaroid-card" data-index="13" data-caption="To many more celebrations and glorious chapters">
+            <div class="polaroid-inner">
+              <div class="card-pin"></div>
+              <div class="photo-box">
+                <img src="./WhatsApp Image 2026-09-16 at 22.06.59.jpeg" alt="Koko moment 14" loading="lazy" />
+              </div>
+              <div class="polaroid-caption">Here's To You! 🥂</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Carousel Navigation Controls -->
+      <div class="cylinder-controls">
+        <button id="carousel-prev" class="carousel-nav-btn" aria-label="Rotate Left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button id="carousel-toggle-spin" class="carousel-nav-btn text-btn">
+          <span id="spin-state-text">⏸ Pause Spin</span>
+        </button>
+        <button id="carousel-next" class="carousel-nav-btn" aria-label="Rotate Right">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+      <p class="drag-hint">💡 Tip: Drag left or right to freely rotate the 3D cylinder!</p>
+    </section>
+
+    <!-- SECTION 3: VIDEO SPOTLIGHT THEATER -->
+    <section class="section-container" id="video-theater">
+      <div class="section-header">
+        <span class="section-tag">Cinematic Highlight</span>
+        <h2 class="section-title">Koko in Motion 🎬</h2>
+        <p class="section-subtitle">A special video spotlight capturing your vivacious spirit and infectious charm!</p>
+      </div>
+
+      <div class="theater-stage">
+        <div class="theater-card-3d" id="theater-card">
+          <div class="video-frame-glow"></div>
+          <div class="video-container">
+            <video id="spotlight-video" playsinline preload="metadata" controls poster="./WhatsApp Image 2026-09-16 at 22.06.53.jpeg">
+              <source src="./WhatsApp Video 2026-09-16 at 22.06.55.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div class="video-info-strip">
+            <div class="video-badge">★ BESTIE SPOTLIGHT ★</div>
+            <p class="video-caption">Live, Laugh, Slay — The Signature Koko Energy!</p>
+            <div class="video-reactions">
+              <button class="react-btn" data-emoji="❤️" title="Send Love">❤️ <span>Love</span></button>
+              <button class="react-btn" data-emoji="🔥" title="So Fire">🔥 <span>Fire</span></button>
+              <button class="react-btn" data-emoji="👑" title="Queen">👑 <span>Queen</span></button>
+              <button class="react-btn" data-emoji="🎉" title="Party">🎉 <span>Party</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: WHY KOKO IS THE GOAT (BENTO CARDS) -->
+    <section class="section-container" id="hall-of-fame">
+      <div class="section-header">
+        <span class="section-tag">Bestie Accolades</span>
+        <h2 class="section-title">Why Koko is the Absolute GOAT 🏆</h2>
+        <p class="section-subtitle">Verified facts that science and friendship have confirmed 100%.</p>
+      </div>
+
+      <div class="bento-grid">
+        <div class="bento-card tilt-card card-large">
+          <div class="card-glare"></div>
+          <div class="bento-icon">👑</div>
+          <h3 class="bento-title">Unstoppable Radiance</h3>
+          <p class="bento-desc">
+            Whenever you walk into a room, the atmosphere elevates instantly. Your warmth and humor have an uncanny ability to turn any terrible day into a celebration.
+          </p>
+          <div class="bento-stat">
+            <span class="stat-number" data-target="100">0</span><span class="stat-symbol">%</span>
+            <span class="stat-label">Positive Aura Guarantee</span>
+          </div>
+        </div>
+
+        <div class="bento-card tilt-card">
+          <div class="card-glare"></div>
+          <div class="bento-icon">⚡</div>
+          <h3 class="bento-title">The 3 AM Safe Haven</h3>
+          <p class="bento-desc">
+            Whether it's unhinged gossip, midnight dilemmas, or impromptu life plans, you're the first person I can count on without hesitation.
+          </p>
+          <div class="bento-stat">
+            <span class="stat-number" data-target="24">0</span><span class="stat-symbol">/7</span>
+            <span class="stat-label">Lifelong Support</span>
+          </div>
+        </div>
+
+        <div class="bento-card tilt-card">
+          <div class="card-glare"></div>
+          <div class="bento-icon">💅</div>
+          <h3 class="bento-title">Certified Trendsetter</h3>
+          <p class="bento-desc">
+            Aesthetic looks, camera presence, effortlessly iconic poses. Every camera angle loves you, and the photo proof is indisputable!
+          </p>
+          <div class="bento-stat">
+            <span class="stat-number" data-target="10">0</span><span class="stat-symbol">/10</span>
+            <span class="stat-label">Flawless Aesthetic</span>
+          </div>
+        </div>
+
+        <div class="bento-card tilt-card card-wide">
+          <div class="card-glare"></div>
+          <div class="bento-icon">🥂</div>
+          <h3 class="bento-title">The Ultimate Partner in Crime</h3>
+          <p class="bento-desc">
+            Here's to a million more laughing fits, spontaneous adventures, coffee runs, and endless memories. Thank you for existing and being the most wonderful friend anyone could have!
+          </p>
+          <div class="bento-chips">
+            <span class="chip">✨ Loyal</span>
+            <span class="chip">💖 Hilarious</span>
+            <span class="chip">🌸 Gorgeous</span>
+            <span class="chip">🎯 Unmatched</span>
+            <span class="chip">👯‍♀️ Inseparable</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: 3D MYSTERY GIFT UNBOXING -->
+    <section class="section-container" id="gift-section">
+      <div class="section-header">
+        <span class="section-tag">Surprise Unboxing</span>
+        <h2 class="section-title">A Special Present for Koko 🎁</h2>
+        <p class="section-subtitle">Click the ribbon to unwrap your secret gift package!</p>
+      </div>
+
+      <div class="gift-stage">
+        <!-- 3D Gift Box Interactive Component -->
+        <div class="gift-box-3d" id="mystery-gift-box">
+          <div class="box-lid" id="box-lid">
+            <div class="lid-top">
+              <div class="ribbon-bow">
+                <span class="bow-loop left"></span>
+                <span class="bow-loop right"></span>
+                <span class="bow-knot"></span>
+              </div>
+              <div class="ribbon-strip vertical"></div>
+              <div class="ribbon-strip horizontal"></div>
+            </div>
+            <div class="lid-face lid-front"></div>
+            <div class="lid-face lid-back"></div>
+            <div class="lid-face lid-left"></div>
+            <div class="lid-face lid-right"></div>
+          </div>
+
+          <div class="box-body" id="box-body">
+            <div class="box-face face-front">
+              <div class="ribbon-strip vertical"></div>
+            </div>
+            <div class="box-face face-back">
+              <div class="ribbon-strip vertical"></div>
+            </div>
+            <div class="box-face face-left">
+              <div class="ribbon-strip vertical"></div>
+            </div>
+            <div class="box-face face-right">
+              <div class="ribbon-strip vertical"></div>
+            </div>
+            <div class="box-face face-bottom"></div>
+            <div class="box-inside">
+              <div class="sparkle-emitter"></div>
+            </div>
+          </div>
+        </div>
+
+        <button id="unwrap-gift-btn" class="btn btn-accent pulse-action">
+          <span>🎁 Tap to Unwrap Gift!</span>
+        </button>
+
+        <!-- Unveiled Certificate / Letter -->
+        <div id="revealed-letter" class="certificate-container hidden-element">
+          <div class="certificate-card">
+            <div class="cert-seal">
+              <span>★ OFFICIAL ★</span>
+            </div>
+            <h3 class="cert-title">BEST BESTIE IN THE UNIVERSE</h3>
+            <p class="cert-subtitle">This honor is proudly presented to</p>
+            <div class="cert-recipient">KOKO</div>
+            <div class="cert-body">
+              <p>
+                For outstanding performance in bringing joy, tolerating crazy shenanigans,
+                giving the best life advice, and being the sweetest companion through every season.
+              </p>
+              <div class="cert-signature-area">
+                <div class="sig-block">
+                  <div class="sig-line hand-script">Forever &amp; Always</div>
+                  <span class="sig-title">Your Bestie</span>
+                </div>
+                <div class="sig-block">
+                  <div class="sig-line date-line">September 16</div>
+                  <span class="sig-title">Celebration Date</span>
+                </div>
+              </div>
+            </div>
+            <div class="cert-actions">
+              <button id="celebrate-again-btn" class="btn btn-primary">
+                🎊 Blast More Confetti!
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: PHOTO MOSAIC (ALL 14 PHOTOS QUICK GRID) -->
+    <section class="section-container" id="photo-wall">
+      <div class="section-header">
+        <span class="section-tag">Complete Gallery</span>
+        <h2 class="section-title">The Koko Scrapbook 📖</h2>
+        <p class="section-subtitle">Every photograph tells our story. Click any image to enlarge.</p>
+      </div>
+
+      <div class="mosaic-grid">
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.52 (1).jpeg" data-caption="Golden hour glow">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.52 (1).jpeg" alt="Koko 1" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.52.jpeg" data-caption="Grace &amp; poise">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.52.jpeg" alt="Koko 2" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.53.jpeg" data-caption="Warmest smile">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.53.jpeg" alt="Koko 3" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.54 (1).jpeg" data-caption="Vibe check 100/100">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.54 (1).jpeg" alt="Koko 4" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.54.jpeg" data-caption="Picture perfect">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.54.jpeg" alt="Koko 5" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.55 (1).jpeg" data-caption="Pure happiness">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.55 (1).jpeg" alt="Koko 6" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.55.jpeg" data-caption="Magnetic presence">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.55.jpeg" alt="Koko 7" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.56 (1).jpeg" data-caption="Cherished bond">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.56 (1).jpeg" alt="Koko 8" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.56.jpeg" data-caption="Sweetest moments">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.56.jpeg" alt="Koko 9" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.57 (1).jpeg" data-caption="Adventure buddy">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.57 (1).jpeg" alt="Koko 10" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.57.jpeg" data-caption="Icon status">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.57.jpeg" alt="Koko 11" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.58 (1).jpeg" data-caption="Forever bestie">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.58 (1).jpeg" alt="Koko 12" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.58.jpeg" data-caption="Radiant energy">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.58.jpeg" alt="Koko 13" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+        <div class="mosaic-item" data-full="./WhatsApp Image 2026-09-16 at 22.06.59.jpeg" data-caption="Here's to you, Koko!">
+          <img src="./WhatsApp Image 2026-09-16 at 22.06.59.jpeg" alt="Koko 14" loading="lazy" />
+          <div class="mosaic-overlay"><span>Enlarge ✨</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+      <div class="footer-cake">🎂</div>
+      <h3 class="footer-title">Have the Happiest Birthday, Koko!</h3>
+      <p class="footer-note">Handcrafted with all my love &amp; appreciation for my bestie.</p>
+      <div class="footer-links">
+        <a href="#hero" class="back-to-top">↑ Back to Top</a>
+      </div>
+    </footer>
+  </main>
+
+  <!-- LIGHTBOX MODAL FOR IMAGES -->
+  <div id="lightbox-modal" class="lightbox-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <button id="lightbox-close" class="lightbox-close-btn" aria-label="Close Preview">✕</button>
+      <div class="lightbox-image-wrap">
+        <img id="lightbox-img" src="" alt="Enlarged photo" />
+      </div>
+      <p id="lightbox-caption" class="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- Interactive Sound FX / Music Script -->
+  <script src="./script.js"></script>
+</body>
+</html>
