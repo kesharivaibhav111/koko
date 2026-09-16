@@ -19,10 +19,18 @@
 
   <!-- Three.js pinned version -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- YouTube IFrame API for background song -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
   <!-- 3D WebGL Background Canvas -->
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Background Music Player (YouTube stream of requested song) -->
+  <div id="yt-player-wrap" style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; opacity:0.01; pointer-events:none;" aria-hidden="true">
+    <div id="yt-audio-player"></div>
+  </div>
 
   <!-- Floating Audio & Quick Action Dock -->
   <header class="top-nav">

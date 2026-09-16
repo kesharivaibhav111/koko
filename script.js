@@ -9,139 +9,124 @@
   'use strict';
 
   /* ==========================================================================
-     1. WEB AUDIO PROCEDURAL SYNTHESIZER & SOUND FX
+     1. BACKGROUND MUSIC: YOUTUBE API (SONG: nAw2ooeubSQ) + PROCEDURAL FALLBACK
      ========================================================================== */
   let audioCtx = null;
   let isMusicPlaying = false;
   let musicTimeoutId = null;
   let noteIndex = 0;
+  let ytPlayer = null;
+  let isYTReady = false;
+  let useFallbackSynth = false;
 
-  function getAudioContext() {
-    if (!audioCtx) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        audioCtx = new AudioContextClass();
-      }
+  // Initialize YouTube IFrame Player for the requested song
+  window.onYouTubeIframeAPIReady = function () {
+    try {
+      ytPlayer = new YT.Player('yt-audio-player', {
+        height: '64',
+        width: '64',
+        videoId: 'nAw2ooeubSQ',
+        playerVars: {
+          autoplay: 0,
+          loop: 1,
+          playlist: 'nAw2ooeubSQ',
+          controls: 0,
+          disablekb: 1,
+          enablejsapi: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: function (e) {
+            isYTReady = true;
+            try {
+              e.target.setVolume(100);
+              e.target.unMute();
+            } catch (err) {}
+          },
+          onStateChange: function (e) {
+            if (e.data === 1) {
+              // Playing
+              isMusicPlaying = true;
+              updateMusicUI(true);
+            } else if (e.data === 2 || e.data === 0) {
+              if (e.data === 0 && ytPlayer) {
+                // Loop back
+                ytPlayer.playVideo();
+              } else {
+                isMusicPlaying = false;
+                updateMusicUI(false);
+              }
+            }
+          },
+          onError: function (err) {
+            console.warn('YouTube audio blocked, falling back to Web Audio synth', err);
+            useFallbackSynth = true;
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('YT Player init failed:', e);
+      useFallbackSynth = true;
     }
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-    return audioCtx;
-  }
-
-  // Frequency table for notes
-  const NOTES = {
-    G3: 196.00, C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23,
-    G4: 392.00, A4: 440.00, B4: 493.88, C5: 523.25, D5: 587.33,
-    E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00
   };
 
-  // Happy Birthday Score: [Note, durationMultiplier, restMultiplier]
-  const BIRTHDAY_MELODY = [
-    // Happy Birthday to you
-    ['G4', 0.75], ['G4', 0.25], ['A4', 1.0], ['G4', 1.0], ['C5', 1.0], ['B4', 2.0],
-    // Happy Birthday to you
-    ['G4', 0.75], ['G4', 0.25], ['A4', 1.0], ['G4', 1.0], ['D5', 1.0], ['C5', 2.0],
-    // Happy Birthday dear Koko
-    ['G4', 0.75], ['G4', 0.25], ['G5', 1.0], ['E5', 1.0], ['C5', 1.0], ['B4', 1.0], ['A4', 2.0],
-    // Happy Birthday to you
-    ['F5', 0.75], ['F5', 0.25], ['E5', 1.0], ['C5', 1.0], ['D5', 1.0], ['C5', 2.5]
-  ];
-
-  // Play a chime/bell note with harmonics and decay
-  function playChimeNote(freq, duration) {
-    const ctx = getAudioContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-
-    // Primary bell tone (sine wave)
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(freq, now);
-
-    // Subtle harmonic chime (triangle wave at 2x frequency)
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(freq * 2, now);
-
-    // Warm sub-fundamental
-    const osc3 = ctx.createOscillator();
-    const gain3 = ctx.createGain();
-    osc3.type = 'sine';
-    osc3.frequency.setValueAtTime(freq * 0.5, now);
-
-    // Envelopes
-    const attack = 0.02;
-    const decay = duration * 0.9;
-
-    gain1.gain.setValueAtTime(0.0001, now);
-    gain1.gain.exponentialRampToValueAtTime(0.3, now + attack);
-    gain1.gain.exponentialRampToValueAtTime(0.0001, now + decay);
-
-    gain2.gain.setValueAtTime(0.0001, now);
-    gain2.gain.exponentialRampToValueAtTime(0.1, now + attack);
-    gain2.gain.exponentialRampToValueAtTime(0.0001, now + decay * 0.7);
-
-    gain3.gain.setValueAtTime(0.0001, now);
-    gain3.gain.exponentialRampToValueAtTime(0.08, now + attack);
-    gain3.gain.exponentialRampToValueAtTime(0.0001, now + decay * 0.5);
-
-    osc1.connect(gain1);
-    osc2.connect(gain2);
-    osc3.connect(gain3);
-
-    gain1.connect(ctx.destination);
-    gain2.connect(ctx.destination);
-    gain3.connect(ctx.destination);
-
-    osc1.start(now);
-    osc2.start(now);
-    osc3.start(now);
-
-    osc1.stop(now + decay);
-    osc2.stop(now + decay);
-    osc3.stop(now + decay);
-  }
-
-  function playNextMelodyStep() {
-    if (!isMusicPlaying) return;
-
-    const tempo = 380; // ms per beat
-    const item = BIRTHDAY_MELODY[noteIndex];
-    const noteName = item[0];
-    const durationFactor = item[1];
-    const freq = NOTES[noteName];
-
-    if (freq) {
-      playChimeNote(freq, (durationFactor * tempo) / 1000);
-    }
-
-    noteIndex = (noteIndex + 1) % BIRTHDAY_MELODY.length;
-    const delay = durationFactor * tempo + 60;
-    musicTimeoutId = setTimeout(playNextMelodyStep, delay);
-  }
-
-  function toggleMusic() {
+  function updateMusicUI(playing) {
     const musicBtn = document.getElementById('music-toggle-btn');
     const label = document.getElementById('music-btn-label');
     const bars = musicBtn ? musicBtn.querySelector('.equalizer-bars') : null;
 
-    if (isMusicPlaying) {
-      isMusicPlaying = false;
-      clearTimeout(musicTimeoutId);
-      if (label) label.textContent = 'Play Music';
-      if (bars) bars.classList.remove('playing');
-    } else {
-      getAudioContext();
-      isMusicPlaying = true;
+    if (playing) {
       if (label) label.textContent = 'Pause Music';
       if (bars) bars.classList.add('playing');
-      noteIndex = 0;
-      playNextMelodyStep();
+    } else {
+      if (label) label.textContent = 'Play Music';
+      if (bars) bars.classList.remove('playing');
     }
+  }
+
+  function startMusic() {
+    if (isYTReady && ytPlayer && typeof ytPlayer.playVideo === 'function' && !useFallbackSynth) {
+      try {
+        ytPlayer.playVideo();
+        isMusicPlaying = true;
+        updateMusicUI(true);
+        return;
+      } catch (err) {
+        useFallbackSynth = true;
+      }
+    }
+    startFallbackSynth();
+  }
+
+  function pauseMusic() {
+    if (isYTReady && ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !useFallbackSynth) {
+      try {
+        ytPlayer.pauseVideo();
+      } catch (err) {}
+    }
+    stopFallbackSynth();
+    isMusicPlaying = false;
+    updateMusicUI(false);
+  }
+
+  function toggleMusic() {
+    if (isMusicPlaying) {
+      pauseMusic();
+    } else {
+      startMusic();
+    }
+  }
+
+  function startFallbackSynth() {
+    getAudioContext();
+    isMusicPlaying = true;
+    updateMusicUI(true);
+    noteIndex = 0;
+    playNextMelodyStep();
+  }
+
+  function stopFallbackSynth() {
+    clearTimeout(musicTimeoutId);
   }
 
   // SFX: Blowing out candles (white noise whoosh with lowpass filter)
@@ -794,6 +779,31 @@
       confettiQuickBtn.addEventListener('click', () => {
         fireMassiveConfetti();
         playCelebrationChime();
+      });
+    }
+
+    // Auto-start background music on first user tap/click
+    const onFirstUserGesture = () => {
+      if (!isMusicPlaying) {
+        startMusic();
+      }
+      window.removeEventListener('click', onFirstUserGesture);
+      window.removeEventListener('touchstart', onFirstUserGesture);
+    };
+    window.addEventListener('click', onFirstUserGesture, { once: true });
+    window.addEventListener('touchstart', onFirstUserGesture, { once: true });
+
+    // Pause background song when spotlight video plays; resume when paused
+    const spotlightVid = document.getElementById('spotlight-video');
+    if (spotlightVid) {
+      spotlightVid.addEventListener('play', () => {
+        if (isMusicPlaying) pauseMusic();
+      });
+      spotlightVid.addEventListener('pause', () => {
+        if (!isMusicPlaying) startMusic();
+      });
+      spotlightVid.addEventListener('ended', () => {
+        if (!isMusicPlaying) startMusic();
       });
     }
   }
