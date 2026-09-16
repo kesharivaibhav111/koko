@@ -343,7 +343,9 @@
 
     // Calculate 3D radius based on screen width
     function getRadius() {
-      return window.innerWidth < 640 ? 340 : 490;
+      if (window.innerWidth < 450) return 295;
+      if (window.innerWidth < 768) return 350;
+      return 490;
     }
 
     let radius = getRadius();
