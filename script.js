@@ -155,6 +155,51 @@
     }
   }
 
+  function getAudioContext() {
+    try {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function playChimeNote(freq, duration = 0.4) {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + duration + 0.05);
+    } catch (err) {
+      console.warn('Chime sound warning:', err);
+    }
+  }
+
+  function playNextMelodyStep() {
+    // Synth step placeholder
+  }
+
   function startFallbackSynth() {
     getAudioContext();
     isMusicPlaying = true;
@@ -649,34 +694,41 @@
 
     function unboxGift(e) {
       if (e) {
-        e.preventDefault();
+        try { e.preventDefault(); } catch (err) {}
       }
 
-      // Guarantee background audio plays on this interaction
-      if (!isMusicPlaying) {
-        startMusic();
+      // If already unboxed, re-open the certificate modal page
+      if (isUnwrapped) {
+        openGiftModal();
+        try { fireMassiveConfetti(); } catch (err) {}
+        return;
       }
 
-      if (giftBox) giftBox.classList.add('unboxed');
-
-      // Celebration Sound and massive confetti
-      playCelebrationChime();
-      fireMassiveConfetti();
-
-      // Show in-page Certificate / Letter
+      // 1. Unhide in-page certificate
       if (revealedLetter) {
         revealedLetter.classList.remove('hidden-element');
       }
+
+      // 2. 3D box unboxing animation
+      if (giftBox) giftBox.classList.add('unboxed');
+
+      // 3. Update button state
       if (unwrapBtn) {
-        unwrapBtn.innerHTML = '<span>✨ Gift Unboxed! Scroll down to view certificate</span>';
+        unwrapBtn.innerHTML = '<span>📜 Open Official Certificate Page ✨</span>';
         unwrapBtn.classList.remove('pulse-action');
       }
 
-      // Pop open the dedicated Fullscreen Certificate Page Modal
-      setTimeout(() => {
-        openGiftModal();
-        fireMassiveConfetti();
-      }, 350);
+      // 4. Open dedicated Fullscreen Certificate Page Modal immediately
+      openGiftModal();
+
+      // 5. Celebration sound & confetti
+      try { playCelebrationChime(); } catch (err) {}
+      try { fireMassiveConfetti(); } catch (err) {}
+
+      // 6. Guarantee background audio plays on this interaction
+      try {
+        if (!isMusicPlaying) startMusic();
+      } catch (err) {}
 
       isUnwrapped = true;
     }
