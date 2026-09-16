@@ -27,7 +27,10 @@
   <!-- 3D WebGL Background Canvas -->
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <!-- Background Music Player (YouTube stream of requested song) -->
+  <!-- Direct Background Audio Stream (Instant 0-delay HTML5 Audio) -->
+  <audio id="bg-audio" src="./music.mp3" loop preload="auto"></audio>
+
+  <!-- Background Music Player (YouTube stream of requested song as fallback) -->
   <div id="yt-player-wrap" style="position:fixed; bottom:0; right:0; width:10px; height:10px; opacity:0.001; pointer-events:none; z-index:-999; overflow:hidden;" aria-hidden="true">
     <div id="yt-audio-player"></div>
   </div>
@@ -630,6 +633,46 @@
         <img id="lightbox-img" src="" alt="Enlarged photo" />
       </div>
       <p id="lightbox-caption" class="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- DEDICATED FULLSCREEN GIFT UNWRAP MODAL / PAGE -->
+  <div id="gift-modal" class="gift-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="gift-modal-backdrop" id="gift-modal-backdrop"></div>
+    <div class="gift-modal-dialog">
+      <button id="gift-modal-close" class="gift-modal-close-btn" aria-label="Close Certificate">✕</button>
+      <div class="certificate-card modal-cert">
+        <div class="cert-seal">
+          <span>★ OFFICIAL BEST BESTIE ★</span>
+        </div>
+        <h3 class="cert-title">BEST BESTIE IN THE UNIVERSE</h3>
+        <p class="cert-subtitle">This honor is proudly presented to</p>
+        <div class="cert-recipient">KOKO</div>
+        <div class="cert-body">
+          <p>
+            For outstanding performance in bringing joy, tolerating crazy shenanigans,
+            giving the best life advice, and being the sweetest companion through every season.
+          </p>
+          <div class="cert-signature-area">
+            <div class="sig-block">
+              <div class="sig-line hand-script">Forever &amp; Always</div>
+              <span class="sig-title">Your Bestie</span>
+            </div>
+            <div class="sig-block">
+              <div class="sig-line date-line">September 17</div>
+              <span class="sig-title">Celebration Date</span>
+            </div>
+          </div>
+        </div>
+        <div class="cert-actions">
+          <button id="modal-celebrate-again-btn" class="btn btn-primary">
+            🎊 Blast More Confetti!
+          </button>
+          <button id="modal-done-btn" class="btn btn-glass">
+            ✨ Keep Celebrating
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

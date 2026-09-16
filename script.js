@@ -94,7 +94,31 @@
     }
   }
 
+  function getBGAudio() {
+    return document.getElementById('bg-audio');
+  }
+
   function startMusic() {
+    const audio = getBGAudio();
+    if (audio) {
+      audio.volume = 1.0;
+      const p = audio.play();
+      if (p !== undefined) {
+        p.then(() => {
+          isMusicPlaying = true;
+          updateMusicUI(true);
+        }).catch((err) => {
+          console.warn('HTML5 Audio autoplay waiting for gesture:', err);
+          // Try fallback YouTube player
+          if (isYTReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+            try { ytPlayer.playVideo(); } catch (e) {}
+          }
+        });
+        return;
+      }
+    }
+
+    // Fallback: YouTube API Player
     if (isYTReady && ytPlayer && typeof ytPlayer.playVideo === 'function' && !useFallbackSynth) {
       try {
         ytPlayer.playVideo();
@@ -109,6 +133,10 @@
   }
 
   function pauseMusic() {
+    const audio = getBGAudio();
+    if (audio && !audio.paused) {
+      try { audio.pause(); } catch (err) {}
+    }
     if (isYTReady && ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !useFallbackSynth) {
       try {
         ytPlayer.pauseVideo();
@@ -594,27 +622,77 @@
     const revealedLetter = document.getElementById('revealed-letter');
     const celebrateAgainBtn = document.getElementById('celebrate-again-btn');
 
+    // Dedicated Fullscreen Celebration Modal / Page
+    const giftModal = document.getElementById('gift-modal');
+    const giftModalClose = document.getElementById('gift-modal-close');
+    const giftModalBackdrop = document.getElementById('gift-modal-backdrop');
+    const modalCelebrateBtn = document.getElementById('modal-celebrate-again-btn');
+    const modalDoneBtn = document.getElementById('modal-done-btn');
+
     let isUnwrapped = false;
 
-    function unboxGift() {
-      if (isUnwrapped) return;
-      isUnwrapped = true;
+    function openGiftModal() {
+      if (giftModal) {
+        giftModal.classList.add('active');
+        giftModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeGiftModal() {
+      if (giftModal) {
+        giftModal.classList.remove('active');
+        giftModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function unboxGift(e) {
+      if (e) {
+        e.preventDefault();
+      }
+
+      // Guarantee background audio plays on this interaction
+      if (!isMusicPlaying) {
+        startMusic();
+      }
 
       if (giftBox) giftBox.classList.add('unboxed');
 
-      // Sound and confetti
+      // Celebration Sound and massive confetti
       playCelebrationChime();
       fireMassiveConfetti();
 
-      // Show Certificate / Letter
+      // Show in-page Certificate / Letter
+      if (revealedLetter) {
+        revealedLetter.classList.remove('hidden-element');
+      }
+      if (unwrapBtn) {
+        unwrapBtn.innerHTML = '<span>✨ Gift Unboxed! Scroll down to view certificate</span>';
+        unwrapBtn.classList.remove('pulse-action');
+      }
+
+      // Pop open the dedicated Fullscreen Certificate Page Modal
       setTimeout(() => {
-        if (revealedLetter) revealedLetter.classList.remove('hidden-element');
-        if (unwrapBtn) unwrapBtn.style.display = 'none';
-      }, 450);
+        openGiftModal();
+        fireMassiveConfetti();
+      }, 350);
+
+      isUnwrapped = true;
     }
 
-    if (giftBox) giftBox.addEventListener('click', unboxGift);
-    if (unwrapBtn) unwrapBtn.addEventListener('click', unboxGift);
+    if (giftBox) {
+      giftBox.addEventListener('click', unboxGift);
+      giftBox.addEventListener('touchend', unboxGift);
+    }
+    if (unwrapBtn) {
+      unwrapBtn.addEventListener('click', unboxGift);
+      unwrapBtn.addEventListener('touchend', unboxGift);
+    }
+
+    if (giftModalClose) giftModalClose.addEventListener('click', closeGiftModal);
+    if (giftModalBackdrop) giftModalBackdrop.addEventListener('click', closeGiftModal);
+    if (modalDoneBtn) modalDoneBtn.addEventListener('click', closeGiftModal);
 
     if (celebrateAgainBtn) {
       celebrateAgainBtn.addEventListener('click', () => {
@@ -622,6 +700,19 @@
         playCelebrationChime();
       });
     }
+
+    if (modalCelebrateBtn) {
+      modalCelebrateBtn.addEventListener('click', () => {
+        fireMassiveConfetti();
+        playCelebrationChime();
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && giftModal && giftModal.classList.contains('active')) {
+        closeGiftModal();
+      }
+    });
   }
 
   /* ==========================================================================
@@ -794,26 +885,21 @@
       });
     }
 
-    // Comprehensive auto-play background music on first user interaction (touch/scroll/click)
-    const onFirstUserGesture = () => {
+    // Immediate autoplay attempt right when page loads
+    try { startMusic(); } catch (e) {}
+
+    // Auto-play background music on ANY user touch, scroll, swipe, or tap anywhere on page
+    const onUserInteraction = () => {
       hasUserInteracted = true;
       if (!isMusicPlaying) {
         startMusic();
       }
-      removeAutoPlayListeners();
     };
 
-    const gestureEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'scroll', 'keydown'];
-    function removeAutoPlayListeners() {
-      gestureEvents.forEach((evt) => {
-        window.removeEventListener(evt, onFirstUserGesture);
-        document.removeEventListener(evt, onFirstUserGesture);
-      });
-    }
-
+    const gestureEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'scroll', 'wheel', 'keydown'];
     gestureEvents.forEach((evt) => {
-      window.addEventListener(evt, onFirstUserGesture, { once: true, passive: true });
-      document.addEventListener(evt, onFirstUserGesture, { once: true, passive: true });
+      window.addEventListener(evt, onUserInteraction, { passive: true });
+      document.addEventListener(evt, onUserInteraction, { passive: true });
     });
 
     // Pause background song when spotlight video plays; resume when paused
