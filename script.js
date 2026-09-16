@@ -9,7 +9,7 @@
   'use strict';
 
   /* ==========================================================================
-     1. BACKGROUND MUSIC: YOUTUBE API (SONG: nAw2ooeubSQ) + PROCEDURAL FALLBACK
+     1. BACKGROUND MUSIC: YOUTUBE API (SONG: ea33O9tX0z0) + PROCEDURAL FALLBACK
      ========================================================================== */
   let audioCtx = null;
   let isMusicPlaying = false;
@@ -18,18 +18,19 @@
   let ytPlayer = null;
   let isYTReady = false;
   let useFallbackSynth = false;
+  let hasUserInteracted = false;
 
   // Initialize YouTube IFrame Player for the requested song
   window.onYouTubeIframeAPIReady = function () {
     try {
       ytPlayer = new YT.Player('yt-audio-player', {
-        height: '64',
-        width: '64',
-        videoId: 'nAw2ooeubSQ',
+        height: '100',
+        width: '100',
+        videoId: 'ea33O9tX0z0',
         playerVars: {
-          autoplay: 0,
+          autoplay: 1,
           loop: 1,
-          playlist: 'nAw2ooeubSQ',
+          playlist: 'ea33O9tX0z0',
           controls: 0,
           disablekb: 1,
           enablejsapi: 1,
@@ -41,7 +42,16 @@
             try {
               e.target.setVolume(100);
               e.target.unMute();
+              // Attempt immediate background autoplay
+              const promise = e.target.playVideo();
+              if (promise && typeof promise.catch === 'function') {
+                promise.catch(function () {});
+              }
             } catch (err) {}
+
+            if (hasUserInteracted && !isMusicPlaying) {
+              startMusic();
+            }
           },
           onStateChange: function (e) {
             if (e.data === 1) {
@@ -784,16 +794,27 @@
       });
     }
 
-    // Auto-start background music on first user tap/click
+    // Comprehensive auto-play background music on first user interaction (touch/scroll/click)
     const onFirstUserGesture = () => {
+      hasUserInteracted = true;
       if (!isMusicPlaying) {
         startMusic();
       }
-      window.removeEventListener('click', onFirstUserGesture);
-      window.removeEventListener('touchstart', onFirstUserGesture);
+      removeAutoPlayListeners();
     };
-    window.addEventListener('click', onFirstUserGesture, { once: true });
-    window.addEventListener('touchstart', onFirstUserGesture, { once: true });
+
+    const gestureEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'scroll', 'keydown'];
+    function removeAutoPlayListeners() {
+      gestureEvents.forEach((evt) => {
+        window.removeEventListener(evt, onFirstUserGesture);
+        document.removeEventListener(evt, onFirstUserGesture);
+      });
+    }
+
+    gestureEvents.forEach((evt) => {
+      window.addEventListener(evt, onFirstUserGesture, { once: true, passive: true });
+      document.addEventListener(evt, onFirstUserGesture, { once: true, passive: true });
+    });
 
     // Pause background song when spotlight video plays; resume when paused
     const spotlightVid = document.getElementById('spotlight-video');
